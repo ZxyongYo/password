@@ -1,84 +1,133 @@
 <template>
-  <button @click="insertOne()">新增</button>
-  <button @click="deleteOne('61cac1f22d0c8950a7893d91')">删除</button>
-  <button @click="updateOne('61cac1f22d0c8950a7893d91')">更新</button>
+  <div class="container">
+    <div class="main">
+      <div class="search-wrapper">
+        <input class="ipt" type="text" placeholder="搜索 . . .">
+        <div class="insert-btn">新增</div>
+      </div>
+      
+      <div class="list">
+        
+      </div>
+      <!-- <button @click="insert()">新增</button>
+      <button @click="deleteById('61cc06fd2d0c8950a789c6e2')">删除</button>
+      <button @click="update('61cc06fd2d0c8950a789c6e2')">更新</button> -->
+    </div>
+  </div>
 </template>
 
 <script setup>
 import { onMounted, reactive } from 'vue'
-import AV from '../utils/leancloud'
+import { deleteOne, fetchList, insertOne, updateOne } from '../utils/leancloud'
 
 let list = reactive([])
 
-onMounted(() => {
-  getList()
+/** 查询数据 */
+onMounted(async () => {
+  list = await fetchList()
+  console.log(list)
 })
 
-/** 查询全部 */
-const getList = async () => {
-  const query = new AV.Query('password')
-  const res = await query.find()
-  list = res.map(item => ({
-      id: item.id,
-      createTime: item.createdAt,
-      updateTime: item.updatedAt,
-      account: item.attributes.account,
-      password: item.attributes.password,
-      title: item.attributes.title,
-      website: item.attributes.website
-    })
-  )
-  console.log(list)
-}
-
 /** 新增 */
-const insertOne = async () => {
-  // 声明 class
-  const Container = AV.Object.extend('password')
-  // 构建对象
-  const pwd = new Container()
-  // 为属性赋值
-  pwd.set('title', '标题')
-  pwd.set('website', '网址')
-  pwd.set('account', '账号')
-  pwd.set('password', '密码')
-
-  // 将对象保存到云端
+const insert = async () => {
   try {
-    await pwd.save()
+    await insertOne({
+      title: '标题',
+      website: '网址',
+      account: '账号',
+      password: '密码'
+    })
     console.log('新增成功')
   } catch (e) {
-    console.log(e)
-    alert('新增失败')
+    console.error(e)
   }
 }
 
-/** 删除一条 */
-const deleteOne = async (id) => {
-  const pwd = AV.Object.createWithoutData('password', id)
+/** 删除 */
+const deleteById = async (id) => {
   try {
-    await pwd.destroy()
+    await deleteOne(id)
     console.log('删除成功')
   } catch (e) {
-    console.log(e)
+    console.error(e)
   }
 }
 
 /** 更新一条 */
-const updateOne = async (id) => {
-  const pwd = AV.Object.createWithoutData('password', id)
-  pwd.set('title', '标题111')
-  pwd.set('website', '网址111')
-  pwd.set('account', '账号111')
-  pwd.set('password', '密码111')
+const update = async (id) => {
   try {
-    await pwd.save()
+    await updateOne({
+      id,
+      title: '标题111',
+      website: '网址111',
+      account: '账号111',
+      password: '密码111'
+    })
     console.log('更新成功')
   } catch (e) {
-    console.log(e)
+    console.error(e)
   }
 }
 </script>
 
 <style lang="scss" scoped>
+.container{
+  min-height: 100vh;
+  background-color: dimgray;
+  overflow: hidden;
+  color: #333;
+  .main{
+    margin: 20px auto;
+    padding: 20px;
+    max-width: 680px;
+    border-radius: 5px;
+    background-color: #fff;
+    .search-wrapper{
+      display: flex;
+      align-items: center;
+      height: 45px;
+      .ipt{
+        padding: 0 20px;
+        width: 84%;
+        height: 100%;
+        background-color: #eee;
+        outline: none;
+        border: none;
+        border-radius: 45px;
+        box-sizing: border-box;
+        font-size: 16px;
+        &:focus{
+          border: 1px solid #ccc;
+        }
+        &::placeholder{
+          color: #999;
+        }
+      }
+      .insert-btn {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        margin-left: 20px;
+        width: 80px;
+        height: 80%;
+        border: 1px solid #999;
+        border-radius: 5px;
+        color: #333;
+        cursor: pointer;
+      }
+    }
+  }
+}
+@media (max-width: 800px) {
+  .container{
+    background-color: #fff;
+    .main{
+      margin: 0 auto;
+      border-radius: 0;
+      .search-wrapper{
+        height: 40px;
+      }
+    }
+  }
+}
 </style>
