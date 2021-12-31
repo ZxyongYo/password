@@ -3,7 +3,7 @@
     <div class="main">
       <div class="search-wrapper">
         <input class="ipt" type="text" placeholder="搜索 . . .">
-        <div class="insert-btn" @click="insert()">新增</div>
+        <Button class="insert-btn" icon="plus" plain type="primary" @click="insert()">新增</Button>
       </div>
 
       <div class="list">
@@ -15,9 +15,8 @@
           </div>
         </div>
       </div>
-      <!-- <button @click="insert()">新增</button>
-      <button @click="deleteById('61cc06fd2d0c8950a789c6e2')">删除</button>
-      <button @click="update('61cc06fd2d0c8950a789c6e2')">更新</button> -->
+
+      <Loading style="margin-top: 100px" v-show="isLoading && list.length < 1" vertical>加载中...</Loading>
     </div>
   </div>
 </template>
@@ -25,25 +24,39 @@
 <script setup>
 import { onMounted, ref } from 'vue'
 import { deleteOne, fetchList, insertOne, updateOne } from '../utils/leancloud'
+import { Button, Icon, Loading, Toast } from 'vant';
+
 
 let list = ref([])
+let isLoading = ref(true)
+let clientWidth = ref(document.body.clientWidth)
 
 onMounted(() => {
+  window.addEventListener('resize', () => {
+    clientWidth.value = document.body.clientWidth
+  })
   getList()
 })
 
 /** 查询数据 */
 const getList = async () => {
+  isLoading.value = true
   try {
     list.value = await fetchList()
     console.log(list.value)
   } catch (e) {
     alert(e.toString())
   }
+  isLoading.value = false
 }
 
 /** 新增 */
 const insert = async () => {
+  Toast.loading({
+    message: '新增中...', 
+    forbidClick: true,
+    position: 'top'
+  })
   try {
     await insertOne({
       title: '百度',
@@ -51,7 +64,10 @@ const insert = async () => {
       account: '账号',
       password: '密码'
     })
-    console.log('新增成功')
+    Toast.success({
+      message: '新增成功',
+      position: 'top'
+    })
     getList()
   } catch (e) {
     console.error(e)
@@ -60,9 +76,17 @@ const insert = async () => {
 
 /** 删除 */
 const deleteById = async id => {
+  Toast.loading({
+    message: '删除中...', 
+    forbidClick: true,
+    position: 'top'
+  })
   try {
     await deleteOne(id)
-    console.log('删除成功')
+    Toast.success({
+      message: '删除成功',
+      position: 'top'
+    })
     getList()
   } catch (e) {
     console.error(e)
@@ -71,6 +95,11 @@ const deleteById = async id => {
 
 /** 更新一条 */
 const update = async id => {
+  Toast.loading({
+    message: '更新中...', 
+    forbidClick: true,
+    position: 'top'
+  })
   try {
     await updateOne({
       id,
@@ -79,7 +108,10 @@ const update = async id => {
       account: '账号111',
       password: '密码111'
     })
-    console.log('更新成功')
+    Toast.success({
+      message: '更新成功',
+      position: 'top'
+    })
     getList()
   } catch (e) {
     console.error(e)
@@ -108,30 +140,24 @@ const update = async id => {
         padding: 0 20px;
         width: 84%;
         height: 100%;
-        background-color: #eee;
+        background-color: #f7f8fa;
         outline: none;
         border: none;
         border-radius: 45px;
         box-sizing: border-box;
         font-size: 16px;
         &:focus {
-          border: 1px solid #ccc;
+          border: 1px solid #eee;
         }
         &::placeholder {
           color: #999;
         }
       }
       .insert-btn {
-        display: flex;
-        justify-content: center;
-        align-items: center;
         margin-left: 20px;
-        width: 80px;
-        height: 80%;
-        border: 1px solid #999;
+        width: 95px;
+        height: 90%;
         border-radius: 5px;
-        color: #333;
-        cursor: pointer;
       }
     }
     .list {
