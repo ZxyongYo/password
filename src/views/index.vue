@@ -29,11 +29,11 @@ import { Button, Icon, Loading, Toast } from 'vant';
 
 let list = ref([])
 let isLoading = ref(true)
-let clientWidth = ref(document.body.clientWidth)
+let isMini = ref(false) // 是否小屏 < 800px
 
 onMounted(() => {
   window.addEventListener('resize', () => {
-    clientWidth.value = document.body.clientWidth
+    isMini.value = document.body.clientWidth < 800
   })
   getList()
 })
@@ -52,11 +52,7 @@ const getList = async () => {
 
 /** 新增 */
 const insert = async () => {
-  Toast.loading({
-    message: '新增中...', 
-    forbidClick: true,
-    position: 'top'
-  })
+  showLoading('新增中...')
   try {
     await insertOne({
       title: '百度',
@@ -64,10 +60,7 @@ const insert = async () => {
       account: '账号',
       password: '密码'
     })
-    Toast.success({
-      message: '新增成功',
-      position: 'top'
-    })
+    showSuccess('新增成功')
     getList()
   } catch (e) {
     console.error(e)
@@ -76,17 +69,10 @@ const insert = async () => {
 
 /** 删除 */
 const deleteById = async id => {
-  Toast.loading({
-    message: '删除中...', 
-    forbidClick: true,
-    position: 'top'
-  })
+  showLoading('删除中...')
   try {
     await deleteOne(id)
-    Toast.success({
-      message: '删除成功',
-      position: 'top'
-    })
+    showSuccess('删除成功')
     getList()
   } catch (e) {
     console.error(e)
@@ -95,11 +81,7 @@ const deleteById = async id => {
 
 /** 更新一条 */
 const update = async id => {
-  Toast.loading({
-    message: '更新中...', 
-    forbidClick: true,
-    position: 'top'
-  })
+  showLoading('更新中...')
   try {
     await updateOne({
       id,
@@ -108,14 +90,27 @@ const update = async id => {
       account: '账号111',
       password: '密码111'
     })
-    Toast.success({
-      message: '更新成功',
-      position: 'top'
-    })
+    showSuccess('更新成功')
     getList()
   } catch (e) {
     console.error(e)
   }
+}
+
+/** toast loading */
+const showLoading = (message) => {
+  Toast.loading({
+    message,
+    forbidClick: true,
+    position: isMini.value ? 'middle' : 'top'
+  })
+}
+/** toast success */
+const showSuccess = (message) => {
+  Toast.loading({
+    message,
+    position: isMini.value ? 'middle' : 'top'
+  })
 }
 </script>
 
