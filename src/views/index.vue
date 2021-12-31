@@ -3,11 +3,17 @@
     <div class="main">
       <div class="search-wrapper">
         <input class="ipt" type="text" placeholder="搜索 . . .">
-        <div class="insert-btn">新增</div>
+        <div class="insert-btn" @click="insert()">新增</div>
       </div>
-      
+
       <div class="list">
-        
+        <div v-for="item in list" :key="item.id" class="item" @click="deleteById(item.id)">
+          <a class="title" :href="item.website" target="black">{{ item.title }}</a>
+          <div class="account">
+            <span class="username">1203123788@qq.com</span>
+            <span class="password">***********</span>
+          </div>
+        </div>
       </div>
       <!-- <button @click="insert()">新增</button>
       <button @click="deleteById('61cc06fd2d0c8950a789c6e2')">删除</button>
@@ -17,44 +23,54 @@
 </template>
 
 <script setup>
-import { onMounted, reactive } from 'vue'
+import { onMounted, ref } from 'vue'
 import { deleteOne, fetchList, insertOne, updateOne } from '../utils/leancloud'
 
-let list = reactive([])
+let list = ref([])
+
+onMounted(() => {
+  getList()
+})
 
 /** 查询数据 */
-onMounted(async () => {
-  list = await fetchList()
-  console.log(list)
-})
+const getList = async () => {
+  try {
+    list.value = await fetchList()
+    console.log(list.value)
+  } catch (e) {
+    alert(e.toString())
+  }
+}
 
 /** 新增 */
 const insert = async () => {
   try {
     await insertOne({
-      title: '标题',
-      website: '网址',
+      title: '百度',
+      website: 'https://www.baidu.com/',
       account: '账号',
       password: '密码'
     })
     console.log('新增成功')
+    getList()
   } catch (e) {
     console.error(e)
   }
 }
 
 /** 删除 */
-const deleteById = async (id) => {
+const deleteById = async id => {
   try {
     await deleteOne(id)
     console.log('删除成功')
+    getList()
   } catch (e) {
     console.error(e)
   }
 }
 
 /** 更新一条 */
-const update = async (id) => {
+const update = async id => {
   try {
     await updateOne({
       id,
@@ -64,6 +80,7 @@ const update = async (id) => {
       password: '密码111'
     })
     console.log('更新成功')
+    getList()
   } catch (e) {
     console.error(e)
   }
@@ -71,22 +88,23 @@ const update = async (id) => {
 </script>
 
 <style lang="scss" scoped>
-.container{
+.container {
   min-height: 100vh;
   background-color: dimgray;
   overflow: hidden;
   color: #333;
-  .main{
+  .main {
     margin: 20px auto;
     padding: 20px;
     max-width: 680px;
+    min-height: 45vh;
     border-radius: 5px;
     background-color: #fff;
-    .search-wrapper{
+    .search-wrapper {
       display: flex;
       align-items: center;
       height: 45px;
-      .ipt{
+      .ipt {
         padding: 0 20px;
         width: 84%;
         height: 100%;
@@ -96,10 +114,10 @@ const update = async (id) => {
         border-radius: 45px;
         box-sizing: border-box;
         font-size: 16px;
-        &:focus{
+        &:focus {
           border: 1px solid #ccc;
         }
-        &::placeholder{
+        &::placeholder {
           color: #999;
         }
       }
@@ -116,15 +134,39 @@ const update = async (id) => {
         cursor: pointer;
       }
     }
+    .list {
+      margin-top: 20px;
+      .item {
+        padding: 15px 10px;
+        border-bottom: 1px solid #eee;
+        &:last-child{
+          border: none;
+        }
+        .title {
+          color: #3090e4;
+          text-decoration: none;
+          &:hover {
+            text-decoration: underline;
+          }
+        }
+        .account{
+          margin-top: 15px;
+          .password{
+            margin-left: 20px;
+          }
+        }
+      }
+    }
   }
 }
 @media (max-width: 800px) {
-  .container{
+  .container {
     background-color: #fff;
-    .main{
+    .main {
       margin: 0 auto;
+      min-width: 335px;
       border-radius: 0;
-      .search-wrapper{
+      .search-wrapper {
         height: 40px;
       }
     }
