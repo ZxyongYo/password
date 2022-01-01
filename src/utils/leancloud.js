@@ -72,19 +72,19 @@ export const deleteOne = async (id) => {
 
 /**
  * 更新
- * @param {{id: string, title: string, website: string, account: string, password: string}} data 更新内容
+ * @param {{id: string, title?: string, website?: string, account?: string, password?: string}} data 更新内容
  */
  export const updateOne = async (data) => {
   const {id, title, website, account, password} = data
-  if(!id, !title || !website || !account || !password) {
-    throw new Error(`expect {id, title, website, account, password} but got ${JSON.stringify(data)}`)
+  if(!id) {
+    throw new Error(`params 'id' is required`)
   }
   try {
     const pwd = AV.Object.createWithoutData('password', id)
-    pwd.set('title', title)
-    pwd.set('website', website)
-    pwd.set('account', account)
-    pwd.set('password', password)
+    title && pwd.set('title', title)
+    website && pwd.set('website', website)
+    account && pwd.set('account', account)
+    password && pwd.set('password', password)
     const res = await pwd.save()
     return Promise.resolve(res)
   } catch (e) {

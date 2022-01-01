@@ -6,6 +6,11 @@ const routes = [
     path: '/',
     name: 'Index',
     component: Index
+  },
+  {
+    path: '/edit',
+    name: 'Edit',
+    component: () => import('@//views/edit.vue')
   }
 ]
 
