@@ -2,19 +2,22 @@
   <div class="container">
     <div class="main">
       <div class="search-wrapper">
-        <input class="ipt" type="text" placeholder="搜索 . . .">
-        <Button class="insert-btn" icon="plus" plain type="primary" @click="toInsert()">新增</Button>
+        <input class="ipt" v-model="searchVal" type="text" placeholder="搜索 . . .">
+        <VanButton class="insert-btn" icon="plus" plain type="primary" @click="toInsert()">新增</VanButton>
       </div>
 
       <div class="list">
-        <div v-for="item in list" :key="item.id" class="item" @click="toEdit(item)">
+        <div v-for="item in list" :key="item.id" class="item">
           <div class="handler">
             <a class="title" :href="item.website" target="_blank">{{ item.title }}</a>
-            <Icon class="handle-btn" name="delete-o" size="20" @click.stop="deleteById(item.id)" />
+            <div class="handle-btn">
+              <Icon class="btn" name="edit" color="#E6A23C" size="20" @click="toEdit(item)" title="编辑" />
+              <Icon class="btn" name="delete-o" color="#ee0a24" size="20" @click.stop="deleteById(item.id)" title="删除" />
+            </div>
           </div>
           <div class="account">
             <div class="info">
-              <span class="username">1203123788@qq.com </span>
+              <span class="username">{{ item.account }}&nbsp;</span>
               <span class="password">
                 {{ item.showPwd ? item.password : item.password.replace(/./g, '*') }}
               </span>
@@ -23,7 +26,7 @@
               class="pwd-btn" 
               :name="item.showPwd ? 'eye-o' : 'closed-eye'" 
               size="20"
-              @click.stop="item.showPwd = !item.showPwd"
+              @click.stop="viewPwd(item)" 
             />
           </div>
         </div>
@@ -37,12 +40,26 @@
 <script setup>
 import { onMounted, ref, watch } from 'vue'
 import { deleteOne, fetchList, insertOne, updateOne } from '../utils/leancloud'
-import { Button, Icon, Loading, Toast, Dialog   } from 'vant';
-import { useRouter } from 'vue-router';
+import { Button as VanButton, Icon, Loading, Toast, Overlay } from 'vant'
+import { useRouter } from 'vue-router'
+import { showLoading, showSuccess } from './toast'
 
 const router = useRouter()
+let originList = []
 let list = ref([])
 let isLoading = ref(true)
+let searchVal = ref('')
+
+/** 搜索 */
+watch(searchVal, val => {
+  list.value = originList
+    .map(item => {
+      if (item.title.includes(val)) {
+        return item
+      }
+    })
+    .filter(item => item)
+})
 
 onMounted(() => {
   getList()
@@ -52,8 +69,10 @@ onMounted(() => {
 const getList = async () => {
   isLoading.value = true
   try {
-    list.value = await fetchList()
-    console.log(list.value)
+    const res = await fetchList()
+    list.value = res
+    originList = res
+    // console.log(list.value)
   } catch (e) {
     alert(e.toString())
   }
@@ -73,7 +92,7 @@ const deleteById = async id => {
     title: '提示',
     message: '确认要删除？'
   })
-  
+
   showLoading('删除中...')
   try {
     await deleteOne(id)
@@ -85,28 +104,17 @@ const deleteById = async id => {
 }
 
 /** 去编辑 */
-const toEdit = (item) => {
-  const {id, title, website ,account}  = item
+const toEdit = item => {
+  const { id, title, website, account } = item
   router.push({
     path: '/edit',
-    query: {id, title, website ,account}
+    query: { id, title, website, account }
   })
 }
 
-/** toast loading */
-const showLoading = (message) => {
-  Toast.loading({
-    message,
-    forbidClick: true,
-    position: 'top'
-  })
-}
-/** toast success */
-const showSuccess = (message) => {
-  Toast.success({
-    message,
-    position: 'top'
-  })
+/** 查看密码 */
+const viewPwd = item => {
+  item.showPwd = !item.showPwd
 }
 </script>
 
@@ -156,10 +164,10 @@ const showSuccess = (message) => {
       .item {
         padding: 15px 10px;
         border-bottom: 1px solid #eee;
-        &:last-child{
+        &:last-child {
           border: none;
         }
-        .handler{
+        .handler {
           display: flex;
           justify-content: space-between;
           align-items: center;
@@ -172,31 +180,35 @@ const showSuccess = (message) => {
               text-decoration: underline;
             }
           }
-          .handle-btn{
+          .handle-btn {
             display: flex;
-            align-items: center;
-            justify-content: center;
-            width: 30px;
-            height: 30px;
-            border-radius: 50%;
-            cursor: pointer;
-            &:hover{
-              background: #eee;
-            }
-            &:active{
-              background: rgb(232, 232, 232);
+            .btn{
+              display: flex;
+              align-items: center;
+              justify-content: center;
+              margin-left: 10px;
+              width: 30px;
+              height: 30px;
+              border-radius: 50%;
+              cursor: pointer;
+              &:hover {
+                background: #eee;
+              }
+              &:active {
+                background: rgb(232, 232, 232);
+              }
             }
           }
         }
-        .account{
+        .account {
           display: flex;
           align-items: center;
           justify-content: space-between;
           margin-top: 10px;
-          .password{
+          .password {
             margin-left: 20px;
           }
-          .pwd-btn{
+          .pwd-btn {
             display: flex;
             align-items: center;
             justify-content: center;
@@ -204,10 +216,10 @@ const showSuccess = (message) => {
             height: 30px;
             border-radius: 50%;
             cursor: pointer;
-            &:hover{
+            &:hover {
               background: #eee;
             }
-            &:active{
+            &:active {
               background: rgb(232, 232, 232);
             }
           }
@@ -229,12 +241,12 @@ const showSuccess = (message) => {
 
       .list {
         .item {
-          .account{
+          .account {
             align-items: flex-end;
-            .info{
+            .info {
               display: flex;
               flex-direction: column;
-              .password{
+              .password {
                 margin: 0;
                 margin-top: 10px;
               }
