@@ -40,7 +40,7 @@
 <script setup>
 import { onMounted, ref, watch } from 'vue'
 import { deleteOne, fetchList, insertOne, updateOne } from '../utils/leancloud'
-import { Button as VanButton, Icon, Loading, Toast, Overlay } from 'vant'
+import { Button as VanButton, Icon, Loading, Toast, Overlay, Dialog } from 'vant'
 import { useRouter } from 'vue-router'
 import { showLoading, showSuccess } from './toast'
 
